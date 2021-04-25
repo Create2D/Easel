@@ -1,4 +1,4 @@
-export default class ColorMatrix extends Array<number>{
+export default class ColorMatrix extends Array<number> {
     constructor(brightness: number = 0, contrast: number = 0, saturation: number = 0, hue: number = 0) {
         super();
         this.setColor(brightness, contrast, saturation, hue);

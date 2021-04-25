@@ -8,7 +8,7 @@ export default class MouseEvent extends Event {
                 public stageY: number,
                 private nativeEvent: any,
                 private pointerID: number|string,
-                private primary: boolean,
+                public primary: boolean,
                 public rawX: number,
                 public rawY: number,
                 private relatedTarget?: DisplayObject) {
