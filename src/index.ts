@@ -1,4 +1,9 @@
 //**********
+// @create2d/core
+//**********
+export {Event, EventDispatcher, Ticker} from  "@create2d/core";
+
+//**********
 // display
 //**********
 export { default as StageGL } from "./display/StageGL";
