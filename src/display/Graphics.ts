@@ -425,7 +425,7 @@ export namespace G {
         constructor(private x: number, private y: number) {};
         path = true;
         public exec(ctx: CanvasRenderingContext2D) {
-            ctx.lineTo(this.x,this.y);
+            ctx.moveTo(this.x,this.y);
         }
     }
 
