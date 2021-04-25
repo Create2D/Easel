@@ -1,0 +1,31 @@
+{
+  "name": "@create2d/easel",
+  "version": "0.0.3",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "files": [
+    "dist/**"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Create2D/Easel.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Create2D/Easel/issues"
+  },
+  "homepage": "https://github.com/Create2D/Easel#readme",
+  "dependencies": {
+    "@create2d/core": "0.0.8"
+  },
+  "description": "A tiny drawing API for HTML canvas",
+  "devDependencies": {
+    "@create2d/tween": "0.0.10"
+  },
+  "sideEffects": false
+}
