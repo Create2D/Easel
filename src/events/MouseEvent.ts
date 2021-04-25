@@ -4,13 +4,13 @@ import DisplayObject from "../display/DisplayObject";
 
 export default class MouseEvent extends Event {
     constructor(type: string, bubbles: boolean, cancelable: boolean,
-                private stageX: number,
-                private stageY: number,
+                public stageX: number,
+                public stageY: number,
                 private nativeEvent: any,
                 private pointerID: number|string,
                 private primary: boolean,
-                private rawX: number,
-                private rawY: number,
+                public rawX: number,
+                public rawY: number,
                 private relatedTarget?: DisplayObject) {
         super(type, bubbles, cancelable);
 

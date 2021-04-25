@@ -4,6 +4,17 @@ import createCanvas from "../utils/Canvas";
 
 type Repeat = "repeat" | "repeat-x" | "repeat-y" | "no-repeat" | "";
 
+declare const enum CanvasLineCapEnum {
+    Butt = "butt",
+    Round = "round",
+    Square = "square"
+}
+declare const enum CanvasLineJoinEnum {
+    Bevel = "bevel",
+    Miter = "miter",
+    Round = "round"
+}
+
 export default class Graphics {
     public static _ctx: CanvasRenderingContext2D;
 
@@ -148,7 +159,7 @@ export default class Graphics {
         return this.beginFill();
     }
 
-    public setStrokeStyle(thickness: number, caps: CanvasLineCap = "butt", joints: CanvasLineJoin = "miter", miterLimit: number = 0, ignoreScale: boolean = true): Graphics {
+    public setStrokeStyle(thickness: number, caps: CanvasLineCap|number = 0, joints: CanvasLineJoin|number = 0, miterLimit: number = 0, ignoreScale: boolean = true): Graphics {
         this._updateInstructions(true);
         this._strokeStyle = this.command = new G.StrokeStyle(thickness, caps, joints, miterLimit, ignoreScale);
 
@@ -530,13 +541,13 @@ export namespace G {
     }
 
     export class StrokeStyle implements Command {
-        constructor (private width: number, private caps: CanvasLineCap = "butt", private joints: CanvasLineJoin = "miter", private miterLimit: number = 10, private ignoreScale: boolean = false) {}
+        constructor (private width: number, private caps: CanvasLineCap|number = 0, private joints: CanvasLineJoin|number = 0, private miterLimit: number = 10, private ignoreScale: boolean = false) {}
         path = false;
 
         public exec(ctx: CanvasRenderingContext2D & {ignoreScale: boolean}) {
             ctx.lineWidth = this.width;
-            ctx.lineCap = this.caps;
-            ctx.lineJoin = this.joints;
+            ctx.lineCap  = (typeof this.caps   == "number") ? [CanvasLineCapEnum.Butt,   CanvasLineCapEnum.Round,  CanvasLineCapEnum.Square][this.caps]   : this.caps;
+            ctx.lineJoin = (typeof this.joints == "number") ? [CanvasLineJoinEnum.Bevel, CanvasLineJoinEnum.Miter, CanvasLineJoinEnum.Round][this.joints] : this.joints;
             ctx.miterLimit = this.miterLimit;
             ctx.ignoreScale = this.ignoreScale;
         }

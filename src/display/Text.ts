@@ -3,9 +3,6 @@ import createCanvas from "../utils/Canvas";
 
 import DisplayObject from "./DisplayObject";
 
-type TextHAlign = "start" | "end" | "left" | "right" | "center";
-type TextVAlign = "top" | "hanging" | "middle" | "alphabetic" | "ideographic" | "bottom";
-
 export default class Text extends DisplayObject {
 
     public static _workingContext: CanvasRenderingContext2D;
@@ -29,12 +26,12 @@ export default class Text extends DisplayObject {
     /**
      * The horizontal text alignment.
      **/
-    public textAlign: TextHAlign = "left";
+    public textAlign: CanvasTextAlign = "left";
 
     /**
      * The vertical alignment point on the font.
      **/
-    public textBaseline: TextVAlign = "top";
+    public textBaseline: CanvasTextBaseline = "top";
 
     /**
      * The maximum width to draw the text. If maxWidth is specified (not null), the text will be condensed or
