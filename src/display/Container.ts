@@ -312,8 +312,6 @@ export default class Container extends DisplayObject {
                 let props = child.getConcatenatedDisplayProps(child._props);
                 mtx = props.matrix;
 
-                console.log("child", props.toString(), child, child._props.toString());
-
                 if (hitArea) {
                     mtx.appendMatrix(hitArea.getMatrix(hitArea._props.matrix));
                     props.alpha = hitArea.alpha;
