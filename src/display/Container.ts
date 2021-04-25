@@ -40,23 +40,17 @@ export default class Container extends DisplayObject {
         return true;
     }
 
-    public addChild(child: DisplayObject, ...children: DisplayObject[]): DisplayObject {
-        const l = children.length;
-        if (l > 1) {
-            for (const arg of children) {
-                this.addChild(arg);
+    public addChild(...children: DisplayObject[]): DisplayObject {
+        for (const child of children) {
+            const parent = child.parent, silent = parent === this;
+            parent && parent._removeChildAt(parent.children.indexOf(child), silent);
+            child.parent = this;
+            this.children.push(child);
+            if (!silent) {
+                child.dispatchEvent("added");
             }
-            return children[l-1];
         }
-        // Note: a lot of duplication with addChildAt, but push is WAY faster than splice.
-        const parent = child.parent, silent = parent === this;
-        parent && parent._removeChildAt(parent.children.indexOf(child), silent);
-        child.parent = this;
-        this.children.push(child);
-        if (!silent) {
-            child.dispatchEvent("added");
-        }
-        return child;
+        return children[children.length - 1];
     }
 
     public addChildAt(child: DisplayObject, index: number): DisplayObject {
@@ -82,16 +76,12 @@ export default class Container extends DisplayObject {
         return child;
     }
 
-    public removeChild(child: DisplayObject): boolean {
-        const l = arguments.length;
-        if (l > 1) {
-            let good = true;
-            for (let i=0; i<l; i++) {
-                good = good && this.removeChild(arguments[i]);
-            }
-            return good;
+    public removeChild(...children: DisplayObject[]): boolean {
+        let good = true;
+        for (const child of children) {
+            good = good && this.removeChildAt(this.children.indexOf(child));
         }
-        return this._removeChildAt(this.children.indexOf(child));
+        return good;
     }
 
     public removeChildAt(index: number): boolean {
