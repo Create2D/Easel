@@ -162,7 +162,7 @@ export default abstract class DisplayObject extends EventDispatcher {
     }
 
     public localToGlobal(x: number, y: number, pt: Point = new Point()): Point {
-        return this.getConcatenatedMatrix(this._props.matrix).transformPoint(x,y, pt);
+        return this.getConcatenatedMatrix(this._props.matrix).transformPoint(x, y, pt);
     }
 
     public globalToLocal(x: number, y: number, pt: Point = new Point()): Point {
@@ -201,7 +201,7 @@ export default abstract class DisplayObject extends EventDispatcher {
 
     public getConcatenatedMatrix(matrix: Matrix2D = new Matrix2D()): Matrix2D {
         const mtx = this.getMatrix(matrix);
-        let o: any = this;
+        let o: any = this.parent;
         while (o) {
             mtx.prependMatrix(o.getMatrix(o._props.matrix));
             o = o.parent;
