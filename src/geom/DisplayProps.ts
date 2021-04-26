@@ -8,7 +8,7 @@ export default class DisplayProps {
         private _alpha?: number,
         private _shadow?: Shadow,
         private _compositeOperation?: CompositeOperation,
-        private _matrix?: Matrix2D
+        private _matrix: Matrix2D = Matrix2D.identity()
     ) {}
 
     public setValues(visible?: boolean, alpha?: number, shadow?: Shadow, compositeOperation?: CompositeOperation, matrix?: Matrix2D): DisplayProps {
@@ -30,11 +30,11 @@ export default class DisplayProps {
         return this._alpha || 1;
     }
     public get matrix(): Matrix2D {
-        return this._matrix || (this._matrix = Matrix2D.identity());
+        return this._matrix;
     }
 
-    public append(visible?: boolean, alpha?: number, shadow?: Shadow, compositeOperation?: CompositeOperation, matrix?: Matrix2D): DisplayProps {
-        this.alpha *= alpha || 1 ;
+    public append(visible: boolean, alpha: number, shadow?: Shadow, compositeOperation?: CompositeOperation, matrix?: Matrix2D): DisplayProps {
+        this.alpha *= alpha;
         this._shadow = shadow || this._shadow;
         this._compositeOperation = compositeOperation || this._compositeOperation;
         this._visible = this._visible && visible;
@@ -42,8 +42,8 @@ export default class DisplayProps {
         return this;
     }
 
-    public prepend(visible?: boolean, alpha?: number, shadow?: Shadow, compositeOperation?: CompositeOperation, matrix?: Matrix2D): DisplayProps {
-        this.alpha *= alpha || 1;
+    public prepend(visible: boolean, alpha: number, shadow?: Shadow, compositeOperation?: CompositeOperation, matrix?: Matrix2D): DisplayProps {
+        this.alpha *= alpha;
         this._shadow = this._shadow || shadow;
         this._compositeOperation = this._compositeOperation || compositeOperation;
         this._visible = this._visible && visible;
@@ -55,14 +55,12 @@ export default class DisplayProps {
         this._visible = true;
         this._alpha = 1;
         this._shadow = this._compositeOperation = undefined;
-        this._matrix = Matrix2D.identity();
+        this._matrix && this._matrix.identity() || (this._matrix = Matrix2D.identity());
         return this;
     }
 
     public toString(): string {
-        return `[DisplayProps (
-            ${this.matrix.toString()}
-        )]`;
+        return `[DisplayProps]`;
     }
 
     public clone(): DisplayProps {
