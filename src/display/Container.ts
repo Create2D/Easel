@@ -25,6 +25,7 @@ export default class Container extends DisplayObject {
         if (super.draw(ctx, ignoreCache)) {
             return true;
         }
+
         // this ensures we don't have issues with display list changes that occur during a draw:
         const list = this.children.slice();
         for (const child of list) {
@@ -43,7 +44,7 @@ export default class Container extends DisplayObject {
     public addChild(...children: DisplayObject[]): DisplayObject {
         for (const child of children) {
             const parent = child.parent, silent = parent === this;
-            parent && parent._removeChildAt(parent.children.indexOf(child), silent);
+            parent && parent.removeChild(child);
             child.parent = this;
             this.children.push(child);
             if (!silent) {
@@ -67,7 +68,7 @@ export default class Container extends DisplayObject {
         }
         const parent = child.parent;
         const silent = parent === this;
-        parent && parent._removeChildAt(parent.children.indexOf(child), silent);
+        parent && parent.removeChild(child);
         child.parent = this;
         this.children.splice(index, 0, child);
         if (!silent) {
@@ -240,8 +241,11 @@ export default class Container extends DisplayObject {
 
     public _tick(evtObj: any) {
         if (this.tickChildren) {
-            for (const child of this.children.reverse()) {
-                if (child.tickEnabled && child._tick) { child._tick(evtObj); }
+            for (let i = this.children.length - 1; i >= 0; i--) {
+                const child = this.children[i];
+                if (child.tickEnabled && child._tick) {
+                    child._tick(evtObj);
+                }
             }
         }
         super._tick(evtObj);
