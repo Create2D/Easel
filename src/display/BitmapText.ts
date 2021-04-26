@@ -10,7 +10,7 @@ export default class BitmapText extends Container {
     /**
      * The text to display.
      **/
-    private text: string = "";
+    public text: string = "";
 
     /**
      * A SpriteSheet instance that defines the glyphs for this bitmap text. Each glyph/character
