@@ -170,7 +170,7 @@ export default class BitmapCache {
         if (!cacheCanvas) { return null; }
         if (this.cacheID !== this._cacheDataURLID) {
             this._cacheDataURLID = this.cacheID;
-            this._cacheDataURL = cacheCanvas.getCacheDataURL ? cacheCanvas.getCacheDataURL(type, encoderOptions) : undefined;
+            this._cacheDataURL = cacheCanvas.toDataURL ? cacheCanvas.toDataURL(type, encoderOptions) : undefined;
         }
         return this._cacheDataURL||null;
     }
