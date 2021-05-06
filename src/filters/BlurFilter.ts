@@ -169,9 +169,8 @@ export default class BlurFilter extends Filter {
 
     public _applyFilter(imageData: ImageData): boolean {
         const radiusX = this.blurX >> 1;
-        if (isNaN(radiusX) || radiusX <= 0) return false;
         const radiusY = this.blurY >> 1;
-        if (isNaN(radiusY) || radiusY <= 0) return false;
+        if (radiusX < 0 || radiusY < 0 || radiusX === 0 && radiusY === 0) return false;
 
         let iterations = this.quality;
         if (iterations > 3) iterations = 3;
@@ -185,62 +184,64 @@ export default class BlurFilter extends Filter {
         const w = imageData.width | 0;
         const h = imageData.height | 0;
 
-        const w1 = (w - 1) | 0;
-        const h1 = (h - 1) | 0;
-        const rxp1 = (radiusX + 1) | 0;
-        const ryp1 = (radiusY + 1) | 0;
+        const w1 = (w - 1);
+        const h1 = (h - 1);
+        const rxp1 = (radiusX + 1);
+        const ryp1 = (radiusY + 1);
 
         type elem = {r: number, b: number, g: number, a: number, n?: elem};
-        let ssx: elem = {r:0,b:0,g:0,a:0};
-        let sx: elem = ssx;
-        for ( i = 1; i < divx; i++ ) {
-            sx = sx.n = {r:0,b:0,g:0,a:0};
-        }
-        sx.n = ssx;
 
-        let ssy: elem = {r:0,b:0,g:0,a:0};
-        let sy = ssy;
-        for ( i = 1; i < divy; i++ ) {
-            sy = sy.n = {r:0,b:0,g:0,a:0};
+        let ssx: elem = {r: 0, b: 0, g: 0, a: 0};
+        let ssy: elem = {r: 0, b: 0, g: 0, a: 0};
+
+        let sx: elem | undefined = ssx;
+        let sy: elem | undefined = ssy;
+
+        for ( i = 1; i < divx; i++ ) {
+            sx = sx.n = {r: 0, b: 0, g: 0, a: 0};
         }
+        for ( i = 1; i < divy; i++ ) {
+            sy = sy.n = {r: 0, b: 0, g: 0, a: 0};
+        }
+
+        sx.n = ssx;
         sy.n = ssy;
 
         let si = null;
 
-        const mtx = BlurFilter.MUL_TABLE[radiusX] | 0;
-        const stx = BlurFilter.SHG_TABLE[radiusX] | 0;
-        const mty = BlurFilter.MUL_TABLE[radiusY] | 0;
-        const sty = BlurFilter.SHG_TABLE[radiusY] | 0;
+        const mtx = BlurFilter.MUL_TABLE[radiusX];
+        const stx = BlurFilter.SHG_TABLE[radiusX];
+        const mty = BlurFilter.MUL_TABLE[radiusY];
+        const sty = BlurFilter.SHG_TABLE[radiusY];
 
         while (iterations-- > 0) {
+
             yw = yi = 0;
             let ms = mtx;
             let ss = stx;
             for (y = h; --y > -1;) {
-                r = rxp1 * (pr = px[(yi) | 0]);
-                g = rxp1 * (pg = px[(yi + 1) | 0]);
-                b = rxp1 * (pb = px[(yi + 2) | 0]);
-                a = rxp1 * (pa = px[(yi + 3) | 0]);
+                r = rxp1 * (pr = px[(yi)]);
+                g = rxp1 * (pg = px[(yi + 1)]);
+                b = rxp1 * (pb = px[(yi + 2)]);
+                a = rxp1 * (pa = px[(yi + 3)]);
 
                 sx = ssx;
 
                 for( i = rxp1; --i > -1; ) {
-                    sx.r = pr;
-                    sx.g = pg;
-                    sx.b = pb;
-                    sx.a = pa;
-                    if(!sx.n) break;
-                    sx = sx.n;
+                    sx!.r = pr;
+                    sx!.g = pg;
+                    sx!.b = pb;
+                    sx!.a = pa;
+                    sx = sx!.n;
                 }
 
                 for( i = 1; i < rxp1; i++ ) {
-                    p = (yi + ((w1 < i ? w1 : i) << 2)) | 0;
-                    r += ( sx.r = px[p]);
-                    g += ( sx.g = px[p+1]);
-                    b += ( sx.b = px[p+2]);
-                    a += ( sx.a = px[p+3]);
-                    if(!sx.n) break;
-                    sx = sx.n;
+                    p = (yi + ((w1 < i ? w1 : i) << 2));
+                    r += ( sx!.r = px[p]);
+                    g += ( sx!.g = px[p+1]);
+                    b += ( sx!.b = px[p+2]);
+                    a += ( sx!.a = px[p+3]);
+                    sx = sx!.n;
                 }
 
                 si = ssx;
@@ -252,13 +253,12 @@ export default class BlurFilter extends Filter {
 
                     p = ((yw + ((p = x + radiusX + 1) < w1 ? p : w1)) << 2);
 
-                    r -= si.r - ( si.r = px[p]);
-                    g -= si.g - ( si.g = px[p+1]);
-                    b -= si.b - ( si.b = px[p+2]);
-                    a -= si.a - ( si.a = px[p+3]);
-                    if(!si.n) break;
-                    si = si.n;
+                    r -= si!.r - ( si!.r = px[p]);
+                    g -= si!.g - ( si!.g = px[p+1]);
+                    b -= si!.b - ( si!.b = px[p+2]);
+                    a -= si!.a - ( si!.a = px[p+3]);
 
+                    si = si!.n;
                 }
                 yw += w;
             }
@@ -266,21 +266,20 @@ export default class BlurFilter extends Filter {
             ms = mty;
             ss = sty;
             for (x = 0; x < w; x++) {
-                yi = (x << 2) | 0;
+                yi = (x << 2);
 
-                r = (ryp1 * (pr = px[yi])) | 0;
-                g = (ryp1 * (pg = px[(yi + 1) | 0])) | 0;
-                b = (ryp1 * (pb = px[(yi + 2) | 0])) | 0;
-                a = (ryp1 * (pa = px[(yi + 3) | 0])) | 0;
+                r = (ryp1 * (pr = px[yi]));
+                g = (ryp1 * (pg = px[(yi + 1)]));
+                b = (ryp1 * (pb = px[(yi + 2)]));
+                a = (ryp1 * (pa = px[(yi + 3)]));
 
                 sy = ssy;
                 for( i = 0; i < ryp1; i++ ) {
-                    sy.r = pr;
-                    sy.g = pg;
-                    sy.b = pb;
-                    sy.a = pa;
-                    if(!sy.n) break;
-                    sy = sy.n;
+                    sy!.r = pr;
+                    sy!.g = pg;
+                    sy!.b = pb;
+                    sy!.a = pa;
+                    sy = sy!.n;
                 }
 
                 yp = w;
@@ -288,43 +287,45 @@ export default class BlurFilter extends Filter {
                 for( i = 1; i <= radiusY; i++ ) {
                     yi = ( yp + x ) << 2;
 
-                    r += ( sy.r = px[yi]);
-                    g += ( sy.g = px[yi+1]);
-                    b += ( sy.b = px[yi+2]);
-                    a += ( sy.a = px[yi+3]);
-                    if(!sy.n) break;
-                    sy = sy.n;
+                    r += ( sy!.r = px[yi]);
+                    g += ( sy!.g = px[yi+1]);
+                    b += ( sy!.b = px[yi+2]);
+                    a += ( sy!.a = px[yi+3]);
 
-                    if( i < h1 )
-                    {
+                    sy = sy!.n;
+
+                    if( i < h1 ) {
                         yp += w;
                     }
                 }
 
                 yi = x;
                 si = ssy;
-                for ( y = 0; y < h; y++ ) {
+
+                for (y = 0; y < h; y++) {
                     p = yi << 2;
                     px[p+3] = pa = (a * ms) >>> ss;
                     if ( pa > 0 ) {
-                        px[p]   = ((r * ms) >>> ss ) * iterations > 0 ? pa : 1;
-                        px[p+1] = ((g * ms) >>> ss ) * iterations > 0 ? pa : 1;
-                        px[p+2] = ((b * ms) >>> ss ) * iterations > 0 ? pa : 1;
+                        pa = iterations > 0 ? 255 / pa : 1;
+                        px[p]   = ((r * ms) >>> ss ) * pa;
+                        px[p+1] = ((g * ms) >>> ss ) * pa;
+                        px[p+2] = ((b * ms) >>> ss ) * pa;
                     } else {
                         px[p] = px[p+1] = px[p+2] = 0
                     }
 
                     p = ( x + (( ( p = y + ryp1) < h1 ? p : h1 ) * w )) << 2;
 
-                    r -= si.r - ( si.r = px[p]);
-                    g -= si.g - ( si.g = px[p+1]);
-                    b -= si.b - ( si.b = px[p+2]);
-                    a -= si.a - ( si.a = px[p+3]);
-                    if(!si.n) break;
-                    si = si.n;
+                    r -= si!.r - ( si!.r = px[p]);
+                    g -= si!.g - ( si!.g = px[p+1]);
+                    b -= si!.b - ( si!.b = px[p+2]);
+                    a -= si!.a - ( si!.a = px[p+3]);
+
+                    si = si!.n;
 
                     yi += w;
                 }
+
             }
 
         }
