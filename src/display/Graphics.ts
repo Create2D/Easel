@@ -159,7 +159,7 @@ export default class Graphics {
         return this.beginFill();
     }
 
-    public setStrokeStyle(thickness: number, caps: CanvasLineCap|number = 0, joints: CanvasLineJoin|number = 0, miterLimit: number = 0, ignoreScale: boolean = true): Graphics {
+    public setStrokeStyle(thickness: number, caps: CanvasLineCap|number = 0, joints: CanvasLineJoin|number = 0, miterLimit: number = 0, ignoreScale: boolean = false): Graphics {
         this._updateInstructions(true);
         this._strokeStyle = this.command = new G.StrokeStyle(thickness, caps, joints, miterLimit, ignoreScale);
 
@@ -493,7 +493,7 @@ export namespace G {
             for (let i = 0, l = colors.length; i < l; i++) {
                 o.addColorStop(ratios[i], colors[i]);
             }
-            o.props = {colors: colors, ratios: ratios, x0: x0, y0: y0, x1: x1, y1: y1, type: "linear"};
+            o.props = {colors, ratios, x0, y0, x1, y1, type: "linear"};
             return this;
         }
 
@@ -502,7 +502,7 @@ export namespace G {
             for (let i = 0, l = colors.length; i < l; i++) {
                 o.addColorStop(ratios[i], colors[i]);
             }
-            o.props = {colors: colors, ratios: ratios, x0: x0, y0: y0, r0: r0, x1: x1, y1: y1, r1: r1, type: "radial"};
+            o.props = {colors, ratios, x0, y0, r0, x1, y1, r1, type: "radial"};
             return this;
         }
 
