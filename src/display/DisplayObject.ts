@@ -267,14 +267,12 @@ export default abstract class DisplayObject extends EventDispatcher {
 
         let minX = tx, maxX = tx, minY = ty, maxY = ty;
 
-        if ((x = x_a + tx) < minX) { minX = x; } else if (x > maxX) { maxX = x; }
-        if ((x = x_a + y_c + tx) < minX) { minX = x; } else if (x > maxX) { maxX = x; }
-        if ((x = y_c + tx) < minX) { minX = x; } else if (x > maxX) { maxX = x; }
+        (x_a > 0) ? maxX += x_a : minX += x_a;
+        (y_c > 0) ? maxX += y_c : minX += y_c;
 
-        if ((y = x_b + ty) < minY) { minY = y; } else if (y > maxY) { maxY = y; }
-        if ((y = x_b + y_d + ty) < minY) { minY = y; } else if (y > maxY) { maxY = y; }
-        if ((y = y_d + ty) < minY) { minY = y; } else if (y > maxY) { maxY = y; }
-
+        (x_b > 0) ? maxY += x_b : minX += x_b;
+        (y_d > 0) ? maxY += y_d : minX += y_d;
+        
         return bounds.setValues(minX, minY, maxX-minX, maxY-minY);
     }
 
