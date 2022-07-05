@@ -44,6 +44,6 @@ export default abstract class Filter {
     }
 
     public _applyFilter(imageData: ImageData): boolean {
-        return true;
+        return !!imageData;
     }
 }

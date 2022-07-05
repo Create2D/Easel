@@ -16,7 +16,7 @@ export default class Shape extends DisplayObject {
         if (super.draw(ctx, ignoreCache)) {
             return true;
         }
-        this.graphics.draw(ctx, this);
+        this.graphics.draw(ctx);
         return true;
     }
 

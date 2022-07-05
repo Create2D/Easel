@@ -111,7 +111,7 @@ export default class BlurFilter extends Filter {
             result.push(1/Math.sqrt(2*Math.PI) * Math.pow(Math.E, -(Math.pow(x,2)/4)));
         }
         const factor = result.reduce(function(a, b) { return a + b; });
-        return result.map(function(currentValue, index, array) { return currentValue/factor; });
+        return result.map((currentValue) => currentValue / factor);
     }
 
     /**

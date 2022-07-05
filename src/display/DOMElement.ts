@@ -31,7 +31,7 @@ export default class DOMElement extends DisplayObject {
         return !!this.htmlElement;
     }
 
-    public draw(ctx: CanvasRenderingContext2D, ignoreCache: boolean): boolean {
+    public draw(): boolean {
         // this relies on the _tick method because draw isn't called if the parent is not visible.
         // the actual update happens in _handleDrawEnd
         return true;
@@ -45,7 +45,7 @@ export default class DOMElement extends DisplayObject {
     // public globalToLocal() {}
     // public localToLocal() {};
 
-    public clone(recursive?: boolean): never {
+    public clone(): never {
         throw("DOMElement cannot be cloned.");
     }
 
@@ -63,7 +63,7 @@ export default class DOMElement extends DisplayObject {
         super._tick(evtObj);
     }
 
-    protected _handleDrawEnd(evt: object): boolean|void {
+    protected _handleDrawEnd(): void {
         const o = this.htmlElement;
         if (!o) { return; }
         const style = o.style;
@@ -79,10 +79,7 @@ export default class DOMElement extends DisplayObject {
 
         if (!oldMtx || !oldMtx.equals(mtx)) {
             const str = "matrix(" + (mtx.a*n|0)/n +","+ (mtx.b*n|0)/n +","+ (mtx.c*n|0)/n +","+ (mtx.d*n|0)/n +","+ (mtx.tx+0.5|0);
-            // @ts-ignore
-            style.transform = style.WebkitTransform = style.OTransform = style.msTransform = str +","+ (mtx.ty+0.5|0) +")";
-            // @ts-ignore
-            style.MozTransform = str +"px,"+ (mtx.ty+0.5|0) +"px)";
+            style.transform = style.webkitTransform = str +","+ (mtx.ty+0.5|0) +")";
             if (!oldProps) {
                 oldProps = this._oldProps = new DisplayProps(true);
             }

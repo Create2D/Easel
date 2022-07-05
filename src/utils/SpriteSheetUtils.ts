@@ -36,7 +36,7 @@ export default class SpriteSheetUtils {
         return img;
     }
 
-    private static _flip(spriteSheet: SpriteSheet, count: number, h: number, v: number) {
+    private static _flip(spriteSheet: SpriteSheet, count: number, h: number, v: number): void {
         const imgs: any = spriteSheet._images;
         const canvas = SpriteSheetUtils._workingCanvas;
         const ctx = SpriteSheetUtils._workingContext;

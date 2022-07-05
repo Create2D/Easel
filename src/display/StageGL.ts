@@ -1664,7 +1664,7 @@ export default class StageGL extends Stage {
             gl.clear(gl.COLOR_BUFFER_BIT);
         }
 
-        this._appendToBatch(content, new Matrix2D(), this.alpha, ignoreCache);
+        this._appendToBatch(content, Matrix2D.identity(), this.alpha, ignoreCache);
 
         this.batchReason = "contentEnd";
         this._renderBatch();

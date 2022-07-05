@@ -122,8 +122,10 @@ export default class SpriteSheet extends EventDispatcher {
                 if (!img.getContext && !img.naturalWidth) {
                     this._loadCount++;
                     this.complete = false;
-                    (function(o, src) { img.onload = function() { o._handleImageLoad(src); } })(this, src);
-                    (function(o, src) { img.onerror = function() { o._handleImageError(src); } })(this, src);
+                    ((o, src) => {
+                        img.onload = () => o._handleImageLoad();
+                        img.onerror = () => o._handleImageError(src);
+                    })(this, src);
                 }
             }
         }
@@ -195,7 +197,7 @@ export default class SpriteSheet extends EventDispatcher {
         }
     }
 
-    private _handleImageLoad(src: any) {
+    private _handleImageLoad() {
         if (--this._loadCount == 0) {
             this._calculateFrames();
             this.complete = true;

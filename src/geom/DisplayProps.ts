@@ -16,7 +16,7 @@ export default class DisplayProps {
         this._alpha = alpha == null ? 1 : alpha;
         this._shadow = shadow;
         this._compositeOperation = compositeOperation;
-        this._matrix = matrix || (this._matrix && this._matrix.identity()) || new Matrix2D();
+        this._matrix = matrix || (this._matrix && this._matrix.identity()) || Matrix2D.identity();
         return this;
     }
 

@@ -24,7 +24,6 @@ export default class Touch {
      **/
     public static isSupported(): boolean {
         return !!(('ontouchstart' in window) // iOS & Android
-            || (window.MSPointerEvent && window.navigator.msMaxTouchPoints > 0) // IE10
             || (window.PointerEvent && window.navigator.maxTouchPoints > 0)); // IE11+
     }
 
@@ -50,7 +49,7 @@ export default class Touch {
         // these to prevent duplicate calls. It doesn't seem to be an issue with iOS devices though.
         if ('ontouchstart' in window) {
             Touch._IOS_enable(stage);
-        } else if (window.PointerEvent || window.MSPointerEvent) {
+        } else if (window.PointerEvent) {
             Touch._IE_enable(stage);
         }
         return true;
@@ -65,7 +64,7 @@ export default class Touch {
         }
         if ('ontouchstart' in window) {
             Touch._IOS_disable(stage);
-        } else if (window.PointerEvent || window.MSPointerEvent) {
+        } else if (window.PointerEvent) {
             Touch._IE_disable(stage);
         }
 

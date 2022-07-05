@@ -56,11 +56,13 @@ export default class BitmapText extends Container {
     /**
      * Used to track the object which this class attached listeners to, helps optimize listener attachment.
      **/
+    // @ts-ignore unused
     private _oldStage: Stage|null = null;
 
     /**
      * The event listener proxy triggered drawing draw for special circumstances.
      **/
+    // @ts-ignore unused
     private _drawAction: Function|null = null;
 
     /**
@@ -118,14 +120,13 @@ export default class BitmapText extends Container {
     }
 
     public clone(recursive?: boolean) {
-        return this.cloneProps(new BitmapText(this.text, this.spriteSheet));
+        const o = new BitmapText(this.text, this.spriteSheet);
+        this.cloneProps(o);
+        if (recursive) {
+            this._cloneChildren(o);
+        }
+        return o;
     }
-
-    public addChild(child: DisplayObject): DisplayObject { return child; }
-    public addChildAt(child: DisplayObject, index: number): DisplayObject { return child; }
-    public removeChild(child: DisplayObject): boolean { return false; }
-    public removeChildAt(index: number): boolean { return false; }
-    public removeAllChildren() {}
 
     _updateState = () => {
         this._updateText();

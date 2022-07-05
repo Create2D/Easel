@@ -4,11 +4,32 @@ import createCanvas from "../utils/Canvas";
 
 type Repeat = "repeat" | "repeat-x" | "repeat-y" | "no-repeat" | "";
 
+type GradientProperties = {
+    colors: string[],
+    ratios: number[],
+    x0: number,
+    y0: number,
+    r0?: number,
+    x1: number,
+    y1: number,
+    r1?: number,
+    type: "radial" | "linear"
+};
+type GradientData = CanvasGradient & {props?: GradientProperties};
+
+type PatternProperties = {
+    image: HTMLImageElement | HTMLCanvasElement | HTMLVideoElement,
+    repetition?: Repeat,
+    type: "bitmap"
+};
+type PatternData = CanvasPattern & {props?: PatternProperties};
+
 declare const enum CanvasLineCapEnum {
     Butt = "butt",
     Round = "round",
     Square = "square"
 }
+
 declare const enum CanvasLineJoinEnum {
     Bevel = "bevel",
     Miter = "miter",
@@ -25,12 +46,12 @@ export default class Graphics {
     protected _oldStrokeStyle: G.StrokeStyle|null = null;
     protected _strokeDash: G.StrokeDash|null = null;
     protected _oldStrokeDash: G.StrokeDash|null = null;
-    protected _strokeIgnoreScale?: boolean;
+    protected _strokeIgnoreScale: boolean = false;
     protected _fill: G.Fill|null = null;
     protected _instructions: G.Command[] = [];
     protected _commitIndex: number = 0;
     protected _activeInstructions: G.Command[] = [];
-    protected _dirty?: boolean = false;
+    protected _dirty: boolean = false;
     protected _storeIndex: number = 0;
 
     constructor() {
@@ -77,11 +98,11 @@ export default class Graphics {
         return !(this._instructions.length || this._activeInstructions.length);
     }
 
-    public draw(ctx: CanvasRenderingContext2D, data?: any) {
+    public draw(ctx: CanvasRenderingContext2D) {
         this._updateInstructions();
         let instr = this._instructions;
         for (let i = this._storeIndex, l = instr.length; i < l; i++) {
-            instr[i].exec(ctx, data);
+            instr[i].exec(ctx);
         }
     }
 
@@ -318,18 +339,18 @@ export default class Graphics {
     public at = this.arcTo;
     public bt = this.bezierCurveTo;
     public qt = this.quadraticCurveTo;
-    public a = this.arc;
-    public r = this.rect;
+    public a  = this.arc;
+    public r  = this.rect;
     public cp = this.closePath;
-    public c = this.clear;
-    public f = this.beginFill;
+    public c  = this.clear;
+    public f  = this.beginFill;
     public lf = this.beginLinearGradientFill;
     public rf = this.beginRadialGradientFill;
     public bf = this.beginBitmapFill;
     public ef = this.endFill;
     public ss = this.setStrokeStyle;
     public sd = this.setStrokeDash;
-    public s = this.beginStroke;
+    public s  = this.beginStroke;
     public ls = this.beginLinearGradientStroke;
     public rs = this.beginRadialGradientStroke;
     public bs = this.beginBitmapStroke;
@@ -341,7 +362,7 @@ export default class Graphics {
     public de = this.drawEllipse;
     public dp = this.drawPolyStar;
     public pg = this.drawPolygon;
-    public p = this.decodePath;
+    public p  = this.decodePath;
 
 
 // private methods:
@@ -409,7 +430,7 @@ if (canvas.getContext) {
 
 export namespace G {
     export interface Command {
-        exec(ctx: CanvasRenderingContext2D, data?: any): void;
+        exec(ctx: CanvasRenderingContext2D): void;
         path ?: boolean;
     }
 
@@ -489,7 +510,7 @@ export namespace G {
         }
 
         public linearGradient(colors: string[], ratios: number[], x0: number, y0: number, x1: number, y1: number): Command {
-            const o: any = this.style = Graphics._ctx.createLinearGradient(x0, y0, x1, y1);
+            const o: GradientData = this.style = Graphics._ctx.createLinearGradient(x0, y0, x1, y1);
             for (let i = 0, l = colors.length; i < l; i++) {
                 o.addColorStop(ratios[i], colors[i]);
             }
@@ -498,7 +519,7 @@ export namespace G {
         }
 
         public radialGradient(colors: string[], ratios: number[], x0: number, y0: number, r0: number, x1: number, y1: number, r1: number): Command {
-            const o: any = this.style = Graphics._ctx.createRadialGradient(x0, y0, r0, x1, y1, r1);
+            const o: GradientData = this.style = Graphics._ctx.createRadialGradient(x0, y0, r0, x1, y1, r1);
             for (let i = 0, l = colors.length; i < l; i++) {
                 o.addColorStop(ratios[i], colors[i]);
             }
@@ -508,17 +529,19 @@ export namespace G {
 
         public bitmap(image: HTMLImageElement | HTMLCanvasElement | HTMLVideoElement, repetition?: Repeat, matrix?: Matrix2D): Command {
             if (matrix) this.matrix = matrix;
-            const protoImage = image as any;
-            if (protoImage.naturalWidth || protoImage.getContext || protoImage.readyState >= 2) {
-                const o: any = this.style = Graphics._ctx.createPattern(image, repetition || "");
-                o.props = {image: image, repetition: repetition, type: "bitmap"};
+            if ((image as HTMLImageElement).naturalWidth || (image as HTMLCanvasElement).getContext || (image as HTMLVideoElement).readyState >= 2) {
+                const o: PatternData|null = this.style = Graphics._ctx.createPattern(image, repetition || "") ;
+
+                if (o) {
+                    o.props = {image, repetition, type: "bitmap"};
+                }
             }
             return this;
         }
     }
 
     export class Stroke implements Command {
-        constructor(private style?: any, public ignoreScale?: boolean) {}
+        constructor(private style?: string | CanvasGradient | CanvasPattern, public ignoreScale: boolean = false) {}
         path = false;
         public exec(ctx: CanvasRenderingContext2D) {
             if (!this.style) {

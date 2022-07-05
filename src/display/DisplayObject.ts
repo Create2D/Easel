@@ -4,6 +4,7 @@ import BitmapCache from "../filters/BitmapCache";
 import DisplayProps from "../geom/DisplayProps";
 import Filter from "../filters/Filter";
 import Matrix2D from "../geom/Matrix2D";
+import Transform from "../geom/Transform";
 import Point from "../geom/Point";
 import Rectangle from "../geom/Rectangle";
 import createCanvas from "../utils/Canvas";
@@ -31,18 +32,9 @@ export default abstract class DisplayObject extends EventDispatcher {
     public name?: string;
     public parent?: Container;
 
-    public x: number = 0;
-    public y: number = 0;
-    public scaleX: number = 1;
-    public scaleY: number = 1;
-    public rotation: number = 0;
-    public skewX: number = 0;
-    public skewY: number = 0;
-    public regX: number = 0;
-    public regY: number = 0;
-
+    public transform: Transform.identity();
     transformMatrix?: Matrix2D;
-    public compositeOperation?: CompositeOperation;
+    public compositeOperation?: CompositeOperation|GlobalCompositeOperation;
     protected snapToPixel?: boolean = true;
     public filters?: Filter[];
     public mask?: Shape;
@@ -53,7 +45,7 @@ export default abstract class DisplayObject extends EventDispatcher {
     protected _rectangle: Rectangle = new Rectangle();
     protected _bounds?: Rectangle;
     public _webGLRenderStyle: StageGLStyle = StageGLStyle.NONE;
-    public _glMtx: Matrix2D = new Matrix2D();
+    public _glMtx: Matrix2D = Matrix2D.identity();
 
     protected static _MOUSE_EVENTS = ["click","dblclick","mousedown","mouseout","mouseover","pressmove","pressup","rollout","rollover"];
     public static suppressCrossDomainErrors: boolean = false;
@@ -70,6 +62,7 @@ export default abstract class DisplayObject extends EventDispatcher {
         if ((o as any).isStage) {
             return o;
         }
+        return undefined;
     }
 
     public get cacheID(): number {
@@ -80,15 +73,39 @@ export default abstract class DisplayObject extends EventDispatcher {
         this.bitmapCache && (this.bitmapCache.cacheID = a)
     }
 
-    public get scale(): number {
-        return this.scaleX;
+    public get x(): number {
+        return this.position.x;
     }
-    public set scale(s: number) {
-        this.scaleX = this.scaleY = s;
+
+    public set x(value: number) {
+        this.transform.position.x = value;
+    }
+
+    public get y(): number {
+        return this.position.y;
+    }
+
+    public set y(value: number) {
+        this.transform.position.y = value;
+    }
+
+    public get position(): Point {
+        return this.transform.position;
+    }
+
+    public set position(value: Point) {
+        this.transform.position.copyFrom(value);
+    }
+
+    public get scale(): Point {
+        return this.transform.scale;
+    }
+    public set scale(s: Point) {
+        this.transform.scale = s;
     }
 
     public isVisible(): boolean {
-        return this.visible && this.alpha > 0 && this.scaleX != 0 && this.scaleY != 0;
+        return this.visible && this.alpha > 0 && this.scale != 0;
     }
 
     public draw(ctx: CanvasRenderingContext2D, ignoreCache: boolean = false): boolean {
@@ -127,7 +144,7 @@ export default abstract class DisplayObject extends EventDispatcher {
         ctx.transform(mtx.a,  mtx.b, mtx.c, mtx.d, tx, ty);
         ctx.globalAlpha *= this.alpha;
         if (this.compositeOperation) {
-            ctx.globalCompositeOperation = this.compositeOperation;
+            ctx.globalCompositeOperation = this.compositeOperation as GlobalCompositeOperation;
         }
         if (this.shadow) {
             this._applyShadow(ctx, this.shadow);
@@ -174,9 +191,15 @@ export default abstract class DisplayObject extends EventDispatcher {
         return target.globalToLocal(pt.x, pt.y, pt);
     }
 
-    public setTransform(params: {x?: number, y?: number, scaleX?: number, scaleY?: number, rotation?: number, skewX?: number, skewY?: number, regX?: number, regY?: number}) : DisplayObject;
-    public setTransform(x?: number, y?: number, scaleX?: number, scaleY?: number, rotation?: number, skewX?: number, skewY?: number, regX?: number, regY?: number): DisplayObject;
-    public setTransform(xOrParams?: number|object, y?: number, scaleX?: number, scaleY?: number, rotation?: number, skewX?: number, skewY?: number, regX?: number, regY?: number): DisplayObject {
+    public setTransform(transform: Transform): this {
+        this.transform = transform;
+
+        return this;
+    }
+
+    public setTransform(params: {x?: number, y?: number, scaleX?: number, scaleY?: number, rotation?: number, skewX?: number, skewY?: number, regX?: number, regY?: number}) : this;
+    public setTransform(x?: number, y?: number, scaleX?: number, scaleY?: number, rotation?: number, skewX?: number, skewY?: number, regX?: number, regY?: number): this;
+    public setTransform(xOrParams?: number|object, y?: number, scaleX?: number, scaleY?: number, rotation?: number, skewX?: number, skewY?: number, regX?: number, regY?: number): this {
         if (xOrParams && typeof xOrParams !== 'number') {
             this.set(xOrParams);
         } else {
@@ -193,13 +216,13 @@ export default abstract class DisplayObject extends EventDispatcher {
         return this;
     }
 
-    public getMatrix(matrix: Matrix2D = new Matrix2D()): Matrix2D {
+    public getMatrix(matrix: Matrix2D = Matrix2D.identity()): Matrix2D {
         const o = this;
         return o.transformMatrix ? matrix.copy(o.transformMatrix) :
             (matrix.identity() && matrix.appendTransform(o.x, o.y, o.scaleX, o.scaleY, o.rotation, o.skewX, o.skewY, o.regX, o.regY));
     }
 
-    public getConcatenatedMatrix(matrix: Matrix2D = new Matrix2D()): Matrix2D {
+    public getConcatenatedMatrix(matrix: Matrix2D = Matrix2D.identity()): Matrix2D {
         const mtx = this.getMatrix(matrix);
         let o: any = this.parent;
         while (o) {
